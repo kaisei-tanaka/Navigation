@@ -1,0 +1,67 @@
+using UnityEngine;
+using TMPro;
+using System;
+
+public class GameUIManager : MonoBehaviour
+{
+    public TMP_Text scoreText;
+    public TMP_Text levelText;
+    public TMP_Text disasterlevelUpText;  // レベルアップ表示
+
+    public int score = 0;
+    public int level = 1;
+    public int scorePerLevel = 10;  // 10ポイントでレベルアップ
+
+    private float levelUpDisplayTime = 1.5f;
+    private float levelUpTimer = 0f;
+    private bool isShowingLevelUp = false;
+
+    void Start()
+    {
+        UpdateUI();
+
+        if (disasterlevelUpText != null)
+            disasterlevelUpText.gameObject.SetActive(false);
+    }
+
+    private void UpdateUI()
+    {
+        throw new NotImplementedException();
+    }
+
+    void Update()
+    {
+        // レベルアップ表示の制御
+        if (isShowingLevelUp)
+        {
+            levelUpTimer += Time.deltaTime;
+
+            if (levelUpTimer >= levelUpDisplayTime)
+            {
+                disasterlevelUpText.gameObject.SetActive(false);
+                isShowingLevelUp = false;
+            }
+        }
+    }
+
+    public void AddScore(int value)
+    {
+        score += value;
+
+        // レベルアップ判定
+        if (score >= level * scorePerLevel)
+        {
+
+            UpdateUI();
+        }
+
+        void UpdateUI()
+        {
+            if (scoreText != null)
+                scoreText.text = "Score : " + score;
+
+            if (levelText != null)
+                levelText.text = "Level : " + level;
+        }
+    }
+}
