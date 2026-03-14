@@ -1,0 +1,105 @@
+using UnityEngine;
+
+public class ViolentMoveOnApproach : MonoBehaviour
+{
+    [Header("プレイヤー（AR Camera）")]
+    public Transform player;
+
+    [Header("距離設定（m）")]
+    public float appearDistance = 3.0f;   // 出現距離
+    public float triggerDistance = 1.0f;  // 激しく動く距離
+
+    [Header("動きの激しさ")]
+    public float rotationSpeed = 720f;
+    public float shakeAmount = 0.15f;
+    public float shakeSpeed = 20f;
+
+    private Vector3 originalPosition;
+    private Quaternion originalRotation;
+    private Renderer objectRenderer;
+
+    private bool isVisible = false;
+    private bool isActive = false;
+
+    void Start()
+    {
+        originalPosition = transform.localPosition;
+        originalRotation = transform.localRotation;
+
+        // Renderer を取得して最初は非表示
+        objectRenderer = GetComponent<Renderer>();
+        if (objectRenderer != null)
+            objectRenderer.enabled = false;
+    }
+
+    void Update()
+    {
+        if (player == null) return;
+
+        float distance = Vector3.Distance(player.position, transform.position);
+
+        // ===== 出現制御（3m以内） =====
+        if (distance <= appearDistance)
+        {
+            if (!isVisible)
+            {
+                ShowObject();
+            }
+        }
+        else
+        {
+            HideAndReset();
+            return;
+        }
+
+        // ===== 激しい動き（1m以内） =====
+        if (distance <= triggerDistance)
+        {
+            isActive = true;
+            ViolentMove();
+        }
+        else
+        {
+            if (isActive)
+                ResetTransform();
+
+            isActive = false;
+        }
+    }
+
+    void ShowObject()
+    {
+        isVisible = true;
+        if (objectRenderer != null)
+            objectRenderer.enabled = true;
+    }
+
+    void HideAndReset()
+    {
+        isVisible = false;
+        isActive = false;
+
+        if (objectRenderer != null)
+            objectRenderer.enabled = false;
+
+        ResetTransform();
+    }
+
+    void ViolentMove()
+    {
+        // 激しい回転
+        transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.Self);
+
+        // 激しい振動
+        float offsetX = Mathf.Sin(Time.time * shakeSpeed) * shakeAmount;
+        float offsetY = Mathf.Cos(Time.time * shakeSpeed * 1.3f) * shakeAmount;
+
+        transform.localPosition = originalPosition + new Vector3(offsetX, offsetY, 0);
+    }
+
+    void ResetTransform()
+    {
+        transform.localPosition = originalPosition;
+        transform.localRotation = originalRotation;
+    }
+}
