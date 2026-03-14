@@ -1,0 +1,45 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class LocalizationCounter : MonoBehaviour
+{
+    [Header("UI")]
+    public TMP_Text countText; // TextMeshProなら TMP_Text に変更
+
+    private int successCount = 0;
+    private bool localized = false;
+
+    void Start()
+    {
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// ローカリゼーション成功時に呼ぶ
+    /// </summary>
+    public void OnLocalizationSuccess()
+    {
+        // 同一ローカリゼーションを多重カウントしないため
+        if (localized) return;
+
+        localized = true;
+        successCount++;
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// 再ローカリゼーションを許可する場合
+    /// </summary>
+    public void ResetLocalizationFlag()
+    {
+        localized = false;
+    }
+
+    private void UpdateUI()
+    {
+        countText.text = $"Localization Count: {successCount}";
+    }
+}
+
+    
