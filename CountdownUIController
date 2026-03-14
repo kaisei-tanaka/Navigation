@@ -1,0 +1,59 @@
+using UnityEngine;
+using System.Collections;
+using TMPro;
+using UnityEngine.UI;
+
+public class CountdownUIController : MonoBehaviour
+{
+    [Header("Countdown")]
+    public TMP_Text countdownText;
+    public float startTime = 30f;
+
+    [Header("End UI")]
+    public GameObject endOverlay;   // 半透明パネル
+    public TMP_Text endText;        // 「終了です」
+
+    private float currentTime;
+    private bool isCounting;
+
+    void Start()
+    {
+        currentTime = startTime;
+        countdownText.text = startTime.ToString("F0");
+
+        countdownText.gameObject.SetActive(false);
+        endOverlay.SetActive(false);
+    }
+
+    // ボタンから呼ぶ
+    public void StartCountdown()
+    {
+        if (isCounting) return;
+
+        countdownText.gameObject.SetActive(true);
+        StartCoroutine(Countdown());
+    }
+
+    IEnumerator Countdown()
+    {
+        isCounting = true;
+
+        while (currentTime > 0)
+        {
+            currentTime -= Time.deltaTime;
+            countdownText.text = Mathf.Ceil(currentTime).ToString();
+            yield return null;
+        }
+
+        countdownText.text = "0";
+        isCounting = false;
+
+        ShowEndScreen();
+    }
+
+    void ShowEndScreen()
+    {
+        endOverlay.SetActive(true);
+        endText.text = "終了です";
+    }
+}
