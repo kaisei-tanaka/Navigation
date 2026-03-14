@@ -1,0 +1,87 @@
+using UnityEngine;
+
+public class GlowAndAnimateOnApproach : MonoBehaviour
+{
+    [Header("プレイヤー（AR Camera）")]
+    public Transform player;
+
+    [Header("発動距離 (m)")]
+    public float triggerDistance = 1.0f;
+
+    [Header("光の強さ")]
+    public Color emissionColor = Color.yellow;
+    public float emissionIntensity = 3.0f;
+
+    private Material material;
+    private Color baseEmissionColor;
+    private bool isActivated = false;
+    private Vector3 originalScale;
+
+    void Start()
+    {
+        Renderer renderer = GetComponent<Renderer>();
+
+        if (renderer != null)
+        {
+            material = renderer.material;
+            baseEmissionColor = material.GetColor("_EmissionColor");
+        }
+
+        originalScale = transform.localScale;
+    }
+
+    void Update()
+    {
+        if (player == null) return;
+
+        float distance = Vector3.Distance(player.position, transform.position);
+
+        if (!isActivated && distance < triggerDistance)
+        {
+            ActivateEffect();
+        }
+        else if (isActivated && distance >= triggerDistance)
+        {
+            DeactivateEffect();
+        }
+
+        // 発動中は動かすアニメーション
+        if (isActivated)
+        {
+            AnimateObject();
+        }
+    }
+
+    void ActivateEffect()
+    {
+        isActivated = true;
+
+        if (material != null)
+        {
+            material.EnableKeyword("_EMISSION");
+            material.SetColor("_EmissionColor", emissionColor * emissionIntensity);
+        }
+    }
+
+    void DeactivateEffect()
+    {
+        isActivated = false;
+
+        if (material != null)
+        {
+            material.SetColor("_EmissionColor", baseEmissionColor);
+        }
+
+        transform.localScale = originalScale;
+    }
+
+    void AnimateObject()
+    {
+        // 回転
+        transform.Rotate(new Vector3(0, 60, 0) * Time.deltaTime);
+
+        // 拡大縮小
+        float scaleAnim = 1 + Mathf.Sin(Time.time * 4f) * 0.1f;
+        transform.localScale = originalScale * scaleAnim;
+    }
+}
