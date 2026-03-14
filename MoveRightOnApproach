@@ -1,0 +1,62 @@
+using UnityEngine;
+
+public class MoveRightOnApproach : MonoBehaviour
+{
+    public Transform player;        // プレイヤー（AR Camera）
+    public float triggerDistance = 1.0f;  // 発動距離
+    public float moveDistance = 1.0f;     // 移動量（右方向に1m）
+    public float moveDuration = 0.5f;     // 移動時間
+    public bool allowRepeat = false;      // 離れたらまた発動できるか
+
+    private bool hasMoved = false;
+    private Vector3 initialPos;
+    private Vector3 targetPos;
+    private float moveTimer = 0f;
+    private bool isMoving = false;
+
+    void Start()
+    {
+        initialPos = transform.position;
+        targetPos = initialPos + transform.right * moveDistance;
+    }
+
+    void Update()
+    {
+        if (player == null) return;
+
+        float distance = Vector3.Distance(player.position, transform.position);
+
+        // 発動条件
+        if (!hasMoved && distance < triggerDistance)
+        {
+            StartMoving();
+        }
+        else if (allowRepeat && hasMoved && distance >= triggerDistance)
+        {
+            // 距離が戻ったらリセット可能
+            hasMoved = false;
+            transform.position = initialPos;
+        }
+
+        // アニメーション処理
+        if (isMoving)
+        {
+            moveTimer += Time.deltaTime;
+            float t = moveTimer / moveDuration;
+
+            transform.position = Vector3.Lerp(initialPos, targetPos, t);
+
+            if (t >= 1f)
+            {
+                isMoving = false;
+                hasMoved = true;
+            }
+        }
+    }
+
+    void StartMoving()
+    {
+        moveTimer = 0f;
+        isMoving = true;
+    }
+}
